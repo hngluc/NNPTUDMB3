@@ -25,6 +25,41 @@ body {
     font-weight: 600;
 }
 
+/* Search Box */
+.search-box {
+    min-width: 300px;
+}
+
+.search-box .input-group {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.search-box .form-control {
+    border-radius: 0;
+    padding: 0.6rem 0.75rem;
+}
+
+.search-box .form-control:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+}
+
+.search-box .input-group-text {
+    border-radius: 0;
+}
+
+.search-box .btn {
+    border-radius: 0;
+}
+
+#searchResult {
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
 /* Table Styles */
 .table {
     margin-bottom: 0;

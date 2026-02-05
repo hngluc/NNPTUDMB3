@@ -1,6 +1,9 @@
 // API URL
 const API_URL = 'https://api.escuelajs.co/api/v1/products';
 
+// Store all products for search
+let allProducts = [];
+
 // DOM Elements
 const loadingEl = document.getElementById('loading');
 const errorEl = document.getElementById('error');
@@ -10,6 +13,9 @@ const productTableBodyEl = document.getElementById('product-table-body');
 const productCountEl = document.getElementById('product-count');
 const modalImageEl = document.getElementById('modalImage');
 const imageModalLabelEl = document.getElementById('imageModalLabel');
+const searchInputEl = document.getElementById('searchInput');
+const clearSearchEl = document.getElementById('clearSearch');
+const searchResultEl = document.getElementById('searchResult');
 
 // Fetch products from API
 async function fetchProducts() {
@@ -23,6 +29,7 @@ async function fetchProducts() {
         }
 
         const products = await response.json();
+        allProducts = products; // Store all products for search
         displayProducts(products);
 
     } catch (error) {
@@ -203,6 +210,16 @@ function escapeHtml(text) {
 
 // Initialize Bootstrap tooltips
 function initTooltips() {
+    // Dispose existing tooltips first
+    const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    existingTooltips.forEach(function (el) {
+        const tooltip = bootstrap.Tooltip.getInstance(el);
+        if (tooltip) {
+            tooltip.dispose();
+        }
+    });
+
+    // Initialize new tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(function (tooltipTriggerEl) {
         new bootstrap.Tooltip(tooltipTriggerEl, {
@@ -212,8 +229,56 @@ function initTooltips() {
     });
 }
 
+// Handle search input
+function handleSearch() {
+    const searchTerm = searchInputEl.value.toLowerCase().trim();
+
+    if (searchTerm === '') {
+        // If search is empty, show all products
+        displayProducts(allProducts);
+        searchResultEl.classList.add('d-none');
+    } else {
+        // Filter products by title
+        const filteredProducts = allProducts.filter(product =>
+            product.title.toLowerCase().includes(searchTerm)
+        );
+
+        displayProducts(filteredProducts);
+
+        // Show search result count
+        searchResultEl.classList.remove('d-none');
+        searchResultEl.textContent = `Tìm thấy ${filteredProducts.length} sản phẩm`;
+    }
+
+    // Re-initialize tooltips after updating the table
+    initTooltips();
+}
+
+// Clear search
+function clearSearch() {
+    searchInputEl.value = '';
+    searchResultEl.classList.add('d-none');
+    displayProducts(allProducts);
+    initTooltips();
+    searchInputEl.focus();
+}
+
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', async function () {
     await fetchProducts();
     initTooltips();
+
+    // Add search event listeners
+    if (searchInputEl) {
+        searchInputEl.addEventListener('input', handleSearch);
+        searchInputEl.addEventListener('keyup', function (e) {
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+    }
+
+    if (clearSearchEl) {
+        clearSearchEl.addEventListener('click', clearSearch);
+    }
 });
