@@ -70,6 +70,13 @@ function createProductRow(product, index) {
     const row = document.createElement('tr');
     row.style.animationDelay = `${index * 0.03}s`;
 
+    // Add tooltip with description on hover
+    const description = product.description || 'Không có mô tả';
+    row.setAttribute('data-bs-toggle', 'tooltip');
+    row.setAttribute('data-bs-placement', 'top');
+    row.setAttribute('data-bs-html', 'true');
+    row.setAttribute('title', `<strong>Mô tả:</strong><br>${escapeHtml(description)}`);
+
     // ID Column
     const idCell = document.createElement('td');
     idCell.className = 'text-center';
@@ -194,7 +201,19 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Initialize Bootstrap tooltips
+function initTooltips() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            container: 'body',
+            trigger: 'hover'
+        });
+    });
+}
+
 // Initialize the dashboard
-document.addEventListener('DOMContentLoaded', function () {
-    fetchProducts();
+document.addEventListener('DOMContentLoaded', async function () {
+    await fetchProducts();
+    initTooltips();
 });

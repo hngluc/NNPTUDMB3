@@ -145,12 +145,12 @@ footer {
     .product-title {
         max-width: 150px;
     }
-    
+
     .product-thumbnail {
         width: 45px;
         height: 45px;
     }
-    
+
     .image-gallery {
         gap: 3px;
     }
@@ -162,6 +162,7 @@ footer {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -172,13 +173,70 @@ footer {
     animation: fadeIn 0.3s ease forwards;
 }
 
-.table tbody tr:nth-child(1) { animation-delay: 0.05s; }
-.table tbody tr:nth-child(2) { animation-delay: 0.1s; }
-.table tbody tr:nth-child(3) { animation-delay: 0.15s; }
-.table tbody tr:nth-child(4) { animation-delay: 0.2s; }
-.table tbody tr:nth-child(5) { animation-delay: 0.25s; }
-.table tbody tr:nth-child(6) { animation-delay: 0.3s; }
-.table tbody tr:nth-child(7) { animation-delay: 0.35s; }
-.table tbody tr:nth-child(8) { animation-delay: 0.4s; }
-.table tbody tr:nth-child(9) { animation-delay: 0.45s; }
-.table tbody tr:nth-child(10) { animation-delay: 0.5s; }
+.table tbody tr:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.table tbody tr:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.table tbody tr:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.table tbody tr:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.table tbody tr:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.table tbody tr:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.table tbody tr:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+.table tbody tr:nth-child(8) {
+    animation-delay: 0.4s;
+}
+
+.table tbody tr:nth-child(9) {
+    animation-delay: 0.45s;
+}
+
+.table tbody tr:nth-child(10) {
+    animation-delay: 0.5s;
+}
+
+/* Custom Tooltip Styles */
+.tooltip {
+    font-size: 0.9rem;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border-radius: 10px;
+    text-align: left;
+    line-height: 1.5;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #2c3e50;
+}
+
+.bs-tooltip-bottom .tooltip-arrow::before {
+    border-bottom-color: #1a252f;
+}
+
+/* Row hover cursor for tooltip hint */
+.table tbody tr {
+    cursor: help;
+}
