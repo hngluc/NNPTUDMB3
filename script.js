@@ -32,6 +32,9 @@ const paginationEl = document.getElementById('pagination');
 const showingStartEl = document.getElementById('showing-start');
 const showingEndEl = document.getElementById('showing-end');
 
+// Export DOM Element
+const exportCsvEl = document.getElementById('exportCsv');
+
 // Fetch products from API
 async function fetchProducts() {
     try {
@@ -442,6 +445,66 @@ function updateSortIcons() {
     });
 }
 
+// Export current view to CSV
+function exportToCsv() {
+    if (filteredProducts.length === 0) {
+        alert('Không có dữ liệu để xuất!');
+        return;
+    }
+
+    // CSV Headers
+    const headers = ['ID', 'Title', 'Price', 'Category', 'Description'];
+
+    // Build CSV content
+    const csvRows = [];
+
+    // Add header row
+    csvRows.push(headers.join(','));
+
+    // Add data rows
+    filteredProducts.forEach(product => {
+        const row = [
+            product.id,
+            `"${escapeCsvValue(product.title)}"`,
+            product.price,
+            `"${escapeCsvValue(product.category?.name || 'N/A')}"`,
+            `"${escapeCsvValue(product.description || '')}"`
+        ];
+        csvRows.push(row.join(','));
+    });
+
+    // Create CSV string with BOM for Excel compatibility
+    const BOM = '\uFEFF';
+    const csvContent = BOM + csvRows.join('\n');
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `products_${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Cleanup
+    URL.revokeObjectURL(url);
+}
+
+// Escape CSV value to handle special characters
+function escapeCsvValue(value) {
+    if (!value) return '';
+    // Replace double quotes with two double quotes and remove line breaks
+    return String(value)
+        .replace(/"/g, '""')
+        .replace(/\r?\n/g, ' ');
+}
+
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', async function () {
     await fetchProducts();
@@ -479,4 +542,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             sortProducts(column);
         });
     });
+
+    // Add export CSV event listener
+    if (exportCsvEl) {
+        exportCsvEl.addEventListener('click', exportToCsv);
+    }
 });

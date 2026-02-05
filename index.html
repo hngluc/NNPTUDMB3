@@ -37,20 +37,26 @@
                                 </h2>
                                 <p class="text-muted mb-0">Dữ liệu từ Platzi Fake Store API</p>
                             </div>
-                            <!-- Search Box -->
-                            <div class="search-box">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0">
-                                        <i class="bi bi-search text-muted"></i>
-                                    </span>
-                                    <input type="text" id="searchInput" class="form-control border-start-0"
-                                        placeholder="Tìm kiếm theo tên sản phẩm..." autocomplete="off">
-                                    <button class="btn btn-outline-secondary" type="button" id="clearSearch"
-                                        title="Xóa tìm kiếm">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <!-- Export Button -->
+                                <button class="btn btn-success" type="button" id="exportCsv" title="Xuất ra file CSV">
+                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export CSV
+                                </button>
+                                <!-- Search Box -->
+                                <div class="search-box">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-search text-muted"></i>
+                                        </span>
+                                        <input type="text" id="searchInput" class="form-control border-start-0"
+                                            placeholder="Tìm kiếm theo tên sản phẩm..." autocomplete="off">
+                                        <button class="btn btn-outline-secondary" type="button" id="clearSearch"
+                                            title="Xóa tìm kiếm">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <small id="searchResult" class="text-muted mt-1 d-none"></small>
                                 </div>
-                                <small id="searchResult" class="text-muted mt-1 d-none"></small>
                             </div>
                         </div>
                     </div>
