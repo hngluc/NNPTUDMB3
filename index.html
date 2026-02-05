@@ -38,6 +38,11 @@
                                 <p class="text-muted mb-0">Dữ liệu từ Platzi Fake Store API</p>
                             </div>
                             <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <!-- Create New Button -->
+                                <button class="btn btn-primary" type="button" id="btnOpenCreateModal"
+                                    title="Tạo sản phẩm mới">
+                                    <i class="bi bi-plus-lg me-1"></i>Tạo mới
+                                </button>
                                 <!-- Export Button -->
                                 <button class="btn btn-success" type="button" id="exportCsv" title="Xuất ra file CSV">
                                     <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export CSV
@@ -131,6 +136,115 @@
                             <!-- Pagination buttons will be generated here -->
                         </ul>
                     </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="productDetailModalLabel">
+                        <i class="bi bi-box-seam me-2"></i>Chi tiết sản phẩm
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- View Mode -->
+                    <div id="viewMode">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div id="detailImageCarousel" class="carousel slide" data-bs-ride="false">
+                                    <div class="carousel-inner" id="detailImages">
+                                        <!-- Images will be loaded here -->
+                                    </div>
+                                    <button class="carousel-control-prev" type="button"
+                                        data-bs-target="#detailImageCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                        data-bs-target="#detailImageCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="product-detail-info">
+                                    <span class="badge bg-secondary mb-2" id="detailId">ID: </span>
+                                    <h4 id="detailTitle" class="fw-bold text-primary"></h4>
+                                    <div class="detail-price mb-3">
+                                        <span class="fs-3 fw-bold text-success" id="detailPrice"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong><i class="bi bi-tag me-1"></i>Danh mục:</strong>
+                                        <span id="detailCategory" class="ms-2"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong><i class="bi bi-file-text me-1"></i>Mô tả:</strong>
+                                        <p id="detailDescription" class="mt-2 text-muted"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div id="editMode" class="d-none">
+                        <form id="editProductForm">
+                            <input type="hidden" id="editProductId">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="editTitle" class="form-label fw-bold">
+                                        <i class="bi bi-fonts me-1"></i>Tên sản phẩm
+                                    </label>
+                                    <input type="text" class="form-control" id="editTitle" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="editPrice" class="form-label fw-bold">
+                                        <i class="bi bi-currency-dollar me-1"></i>Giá ($)
+                                    </label>
+                                    <input type="number" class="form-control" id="editPrice" min="0" step="0.01"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editDescription" class="form-label fw-bold">
+                                    <i class="bi bi-file-text me-1"></i>Mô tả
+                                </label>
+                                <textarea class="form-control" id="editDescription" rows="4"></textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Loading Spinner for Update -->
+                    <div id="updateLoading" class="text-center d-none py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang cập nhật...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Đang cập nhật sản phẩm...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div id="viewModeButtons">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Đóng
+                        </button>
+                        <button type="button" class="btn btn-primary" id="btnEditProduct">
+                            <i class="bi bi-pencil me-1"></i>Chỉnh sửa
+                        </button>
+                    </div>
+                    <div id="editModeButtons" class="d-none">
+                        <button type="button" class="btn btn-secondary" id="btnCancelEdit">
+                            <i class="bi bi-x-lg me-1"></i>Hủy
+                        </button>
+                        <button type="button" class="btn btn-success" id="btnSaveProduct">
+                            <i class="bi bi-check-lg me-1"></i>Lưu thay đổi
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

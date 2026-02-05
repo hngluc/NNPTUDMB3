@@ -35,6 +35,30 @@ const showingEndEl = document.getElementById('showing-end');
 // Export DOM Element
 const exportCsvEl = document.getElementById('exportCsv');
 
+// Product Detail Modal DOM Elements
+const productDetailModal = document.getElementById('productDetailModal');
+const detailImagesEl = document.getElementById('detailImages');
+const detailIdEl = document.getElementById('detailId');
+const detailTitleEl = document.getElementById('detailTitle');
+const detailPriceEl = document.getElementById('detailPrice');
+const detailCategoryEl = document.getElementById('detailCategory');
+const detailDescriptionEl = document.getElementById('detailDescription');
+const viewModeEl = document.getElementById('viewMode');
+const editModeEl = document.getElementById('editMode');
+const viewModeButtonsEl = document.getElementById('viewModeButtons');
+const editModeButtonsEl = document.getElementById('editModeButtons');
+const updateLoadingEl = document.getElementById('updateLoading');
+const btnEditProductEl = document.getElementById('btnEditProduct');
+const btnCancelEditEl = document.getElementById('btnCancelEdit');
+const btnSaveProductEl = document.getElementById('btnSaveProduct');
+const editProductIdEl = document.getElementById('editProductId');
+const editTitleEl = document.getElementById('editTitle');
+const editPriceEl = document.getElementById('editPrice');
+const editDescriptionEl = document.getElementById('editDescription');
+
+// Current selected product
+let currentProduct = null;
+
 // Fetch products from API
 async function fetchProducts() {
     try {
@@ -198,6 +222,8 @@ function goToPage(page) {
 function createProductRow(product, index) {
     const row = document.createElement('tr');
     row.style.animationDelay = `${index * 0.03}s`;
+    row.classList.add('clickable-row');
+    row.setAttribute('data-product-id', product.id);
 
     // Add tooltip with description on hover
     const description = product.description || 'Không có mô tả';
@@ -505,6 +531,208 @@ function escapeCsvValue(value) {
         .replace(/\r?\n/g, ' ');
 }
 
+// Show product detail in modal
+function showProductDetail(productId) {
+    // Find the product by ID
+    currentProduct = allProducts.find(p => p.id === productId);
+
+    if (!currentProduct) {
+        console.error('Product not found:', productId);
+        return;
+    }
+
+    // Reset to view mode
+    switchToViewMode();
+
+    // Populate detail view
+    detailIdEl.textContent = `ID: ${currentProduct.id}`;
+    detailTitleEl.textContent = currentProduct.title || 'N/A';
+    detailPriceEl.textContent = `$${formatPrice(currentProduct.price)}`;
+    detailCategoryEl.innerHTML = createCategoryBadge(currentProduct.category);
+    detailDescriptionEl.textContent = currentProduct.description || 'Không có mô tả';
+
+    // Populate images carousel
+    detailImagesEl.innerHTML = '';
+    const images = currentProduct.images || [];
+
+    if (images.length > 0) {
+        images.forEach((image, index) => {
+            const cleanUrl = cleanImageUrl(image);
+            const carouselItem = document.createElement('div');
+            carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+            carouselItem.innerHTML = `
+                <img src="${cleanUrl}" alt="${escapeHtml(currentProduct.title)} - Image ${index + 1}" 
+                     onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+            `;
+            detailImagesEl.appendChild(carouselItem);
+        });
+    } else {
+        detailImagesEl.innerHTML = `
+            <div class="carousel-item active">
+                <img src="https://via.placeholder.com/400x300?text=No+Image" alt="No Image">
+            </div>
+        `;
+    }
+
+    // Show the modal
+    const modal = new bootstrap.Modal(productDetailModal);
+    modal.show();
+}
+
+// Switch to edit mode
+function switchToEditMode() {
+    viewModeEl.classList.add('d-none');
+    editModeEl.classList.remove('d-none');
+    viewModeButtonsEl.classList.add('d-none');
+    editModeButtonsEl.classList.remove('d-none');
+    updateLoadingEl.classList.add('d-none');
+
+    // Populate edit form with current product data
+    editProductIdEl.value = currentProduct.id;
+    editTitleEl.value = currentProduct.title || '';
+    editPriceEl.value = currentProduct.price || 0;
+    editDescriptionEl.value = currentProduct.description || '';
+}
+
+// Switch to view mode
+function switchToViewMode() {
+    viewModeEl.classList.remove('d-none');
+    editModeEl.classList.add('d-none');
+    viewModeButtonsEl.classList.remove('d-none');
+    editModeButtonsEl.classList.add('d-none');
+    updateLoadingEl.classList.add('d-none');
+}
+
+// Update product via API
+async function updateProduct() {
+    const productId = editProductIdEl.value;
+    const updatedData = {
+        title: editTitleEl.value.trim(),
+        price: parseFloat(editPriceEl.value),
+        description: editDescriptionEl.value.trim(),
+        categoryId: currentProduct.category?.id || null // Include categoryId
+    };
+
+    // Validate
+    if (!updatedData.title) {
+        showToast('Vui lòng nhập tên sản phẩm!', 'danger');
+        return;
+    }
+
+    if (updatedData.price < 0 || isNaN(updatedData.price)) {
+        showToast('Giá sản phẩm không hợp lệ!', 'danger');
+        return;
+    }
+
+    // Show loading
+    viewModeEl.classList.add('d-none');
+    editModeEl.classList.add('d-none');
+    viewModeButtonsEl.classList.add('d-none');
+    editModeButtonsEl.classList.add('d-none');
+    updateLoadingEl.classList.remove('d-none');
+
+    try {
+        const response = await fetch(`${API_URL}/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        // Handle different error status codes
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+
+            // Handle 500 error - API may not allow updating some products
+            if (response.status === 500) {
+                throw new Error('Server không thể xử lý yêu cầu. Một số sản phẩm có thể không cho phép cập nhật.');
+            } else if (response.status === 400) {
+                throw new Error(errorData.message || 'Dữ liệu không hợp lệ');
+            } else if (response.status === 404) {
+                throw new Error('Không tìm thấy sản phẩm');
+            } else {
+                throw new Error(`Lỗi HTTP: ${response.status}`);
+            }
+        }
+
+        const result = await response.json();
+
+        // Update the product in our local arrays
+        const updateInArray = (arr) => {
+            const index = arr.findIndex(p => p.id === parseInt(productId));
+            if (index !== -1) {
+                arr[index] = { ...arr[index], ...updatedData };
+            }
+        };
+
+        updateInArray(allProducts);
+        updateInArray(filteredProducts);
+
+        // Update current product
+        currentProduct = { ...currentProduct, ...updatedData };
+
+        // Refresh the display
+        displayProducts();
+        initTooltips();
+
+        // Update detail view and switch back to view mode
+        detailTitleEl.textContent = currentProduct.title;
+        detailPriceEl.textContent = `$${formatPrice(currentProduct.price)}`;
+        detailDescriptionEl.textContent = currentProduct.description || 'Không có mô tả';
+
+        switchToViewMode();
+
+        // Show success message
+        showToast('Cập nhật sản phẩm thành công!', 'success');
+
+    } catch (error) {
+        console.error('Error updating product:', error);
+        showToast(error.message || 'Lỗi khi cập nhật sản phẩm', 'danger');
+        switchToEditMode();
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'success') {
+    // Create toast container if not exists
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toastId = 'toast-' + Date.now();
+    const iconClass = type === 'success' ? 'bi-check-circle' : (type === 'warning' ? 'bi-exclamation-circle' : 'bi-exclamation-triangle');
+    const textClass = type === 'warning' ? 'text-dark' : 'text-white';
+    const btnCloseClass = type === 'warning' ? '' : 'btn-close-white';
+
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center ${textClass} bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${iconClass} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close ${btnCloseClass} me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+
+    // Remove toast element after hidden
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', async function () {
     await fetchProducts();
@@ -546,5 +774,34 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Add export CSV event listener
     if (exportCsvEl) {
         exportCsvEl.addEventListener('click', exportToCsv);
+    }
+
+    // Add Product Detail Modal event listeners
+    if (btnEditProductEl) {
+        btnEditProductEl.addEventListener('click', switchToEditMode);
+    }
+
+    if (btnCancelEditEl) {
+        btnCancelEditEl.addEventListener('click', switchToViewMode);
+    }
+
+    if (btnSaveProductEl) {
+        btnSaveProductEl.addEventListener('click', updateProduct);
+    }
+
+    // Add click event for table rows to show product detail
+    productTableBodyEl.addEventListener('click', function (e) {
+        const row = e.target.closest('tr.clickable-row');
+        if (row && !e.target.closest('.product-thumbnail')) {
+            const productId = parseInt(row.getAttribute('data-product-id'));
+            showProductDetail(productId);
+        }
+    });
+
+    // Reset modal to view mode when closed
+    if (productDetailModal) {
+        productDetailModal.addEventListener('hidden.bs.modal', function () {
+            switchToViewMode();
+        });
     }
 });
