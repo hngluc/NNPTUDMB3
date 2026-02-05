@@ -275,3 +275,50 @@ footer {
 .table tbody tr {
     cursor: help;
 }
+
+/* Pagination Styles */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: none;
+    color: #495057;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: transparent;
+    color: #adb5bd;
+}
+
+/* Items per page select */
+#itemsPerPage {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.25rem 2rem 0.25rem 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+#itemsPerPage:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+@media (max-width: 768px) {
+    .pagination .page-link {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}

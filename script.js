@@ -3,6 +3,11 @@ const API_URL = 'https://api.escuelajs.co/api/v1/products';
 
 // Store all products for search
 let allProducts = [];
+let filteredProducts = [];
+
+// Pagination variables
+let currentPage = 1;
+let itemsPerPage = 10;
 
 // DOM Elements
 const loadingEl = document.getElementById('loading');
@@ -17,6 +22,12 @@ const searchInputEl = document.getElementById('searchInput');
 const clearSearchEl = document.getElementById('clearSearch');
 const searchResultEl = document.getElementById('searchResult');
 
+// Pagination DOM Elements
+const itemsPerPageEl = document.getElementById('itemsPerPage');
+const paginationEl = document.getElementById('pagination');
+const showingStartEl = document.getElementById('showing-start');
+const showingEndEl = document.getElementById('showing-end');
+
 // Fetch products from API
 async function fetchProducts() {
     try {
@@ -30,7 +41,9 @@ async function fetchProducts() {
 
         const products = await response.json();
         allProducts = products; // Store all products for search
-        displayProducts(products);
+        filteredProducts = products; // Initialize filtered products
+        currentPage = 1;
+        displayProducts();
 
     } catch (error) {
         showError(`Không thể tải dữ liệu sản phẩm: ${error.message}`);
@@ -53,8 +66,8 @@ function showError(message) {
     errorMessageEl.textContent = message;
 }
 
-// Display products in table
-function displayProducts(products) {
+// Display products in table with pagination
+function displayProducts() {
     loadingEl.classList.add('d-none');
     errorEl.classList.add('d-none');
     tableContainerEl.classList.remove('d-none');
@@ -62,14 +75,116 @@ function displayProducts(products) {
     // Clear existing content
     productTableBodyEl.innerHTML = '';
 
-    // Update product count
-    productCountEl.textContent = products.length;
+    // Calculate pagination
+    const totalProducts = filteredProducts.length;
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
+    // Ensure current page is valid
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    // Get products for current page
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalProducts);
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Update product count and showing info
+    productCountEl.textContent = totalProducts;
+    showingStartEl.textContent = totalProducts > 0 ? startIndex + 1 : 0;
+    showingEndEl.textContent = endIndex;
 
     // Create table rows
-    products.forEach((product, index) => {
+    paginatedProducts.forEach((product, index) => {
         const row = createProductRow(product, index);
         productTableBodyEl.appendChild(row);
     });
+
+    // Render pagination
+    renderPagination(totalPages);
+}
+
+// Render pagination buttons
+function renderPagination(totalPages) {
+    paginationEl.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><i class="bi bi-chevron-left"></i></a>`;
+    prevLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentPage > 1) goToPage(currentPage - 1);
+    });
+    paginationEl.appendChild(prevLi);
+
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // First page + ellipsis
+    if (startPage > 1) {
+        paginationEl.appendChild(createPageItem(1));
+        if (startPage > 2) {
+            const ellipsis = document.createElement('li');
+            ellipsis.className = 'page-item disabled';
+            ellipsis.innerHTML = '<span class="page-link">...</span>';
+            paginationEl.appendChild(ellipsis);
+        }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        paginationEl.appendChild(createPageItem(i));
+    }
+
+    // Last page + ellipsis
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('li');
+            ellipsis.className = 'page-item disabled';
+            ellipsis.innerHTML = '<span class="page-link">...</span>';
+            paginationEl.appendChild(ellipsis);
+        }
+        paginationEl.appendChild(createPageItem(totalPages));
+    }
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><i class="bi bi-chevron-right"></i></a>`;
+    nextLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentPage < totalPages) goToPage(currentPage + 1);
+    });
+    paginationEl.appendChild(nextLi);
+}
+
+// Create a page item
+function createPageItem(pageNum) {
+    const li = document.createElement('li');
+    li.className = `page-item ${pageNum === currentPage ? 'active' : ''}`;
+    li.innerHTML = `<a class="page-link" href="#">${pageNum}</a>`;
+    li.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToPage(pageNum);
+    });
+    return li;
+}
+
+// Go to specific page
+function goToPage(page) {
+    currentPage = page;
+    displayProducts();
+    initTooltips();
+    // Scroll to top of table
+    tableContainerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Create a table row for a product
@@ -235,20 +350,22 @@ function handleSearch() {
 
     if (searchTerm === '') {
         // If search is empty, show all products
-        displayProducts(allProducts);
+        filteredProducts = allProducts;
         searchResultEl.classList.add('d-none');
     } else {
         // Filter products by title
-        const filteredProducts = allProducts.filter(product =>
+        filteredProducts = allProducts.filter(product =>
             product.title.toLowerCase().includes(searchTerm)
         );
-
-        displayProducts(filteredProducts);
 
         // Show search result count
         searchResultEl.classList.remove('d-none');
         searchResultEl.textContent = `Tìm thấy ${filteredProducts.length} sản phẩm`;
     }
+
+    // Reset to first page when searching
+    currentPage = 1;
+    displayProducts();
 
     // Re-initialize tooltips after updating the table
     initTooltips();
@@ -258,7 +375,9 @@ function handleSearch() {
 function clearSearch() {
     searchInputEl.value = '';
     searchResultEl.classList.add('d-none');
-    displayProducts(allProducts);
+    filteredProducts = allProducts;
+    currentPage = 1;
+    displayProducts();
     initTooltips();
     searchInputEl.focus();
 }
@@ -280,5 +399,15 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (clearSearchEl) {
         clearSearchEl.addEventListener('click', clearSearch);
+    }
+
+    // Add items per page event listener
+    if (itemsPerPageEl) {
+        itemsPerPageEl.addEventListener('change', function () {
+            itemsPerPage = parseInt(this.value);
+            currentPage = 1;
+            displayProducts();
+            initTooltips();
+        });
     }
 });
