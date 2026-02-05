@@ -9,6 +9,10 @@ let filteredProducts = [];
 let currentPage = 1;
 let itemsPerPage = 10;
 
+// Sorting variables
+let sortColumn = null; // 'title' or 'price'
+let sortDirection = 'asc'; // 'asc' or 'desc'
+
 // DOM Elements
 const loadingEl = document.getElementById('loading');
 const errorEl = document.getElementById('error');
@@ -377,9 +381,65 @@ function clearSearch() {
     searchResultEl.classList.add('d-none');
     filteredProducts = allProducts;
     currentPage = 1;
+    sortColumn = null; // Reset sorting when clearing search
     displayProducts();
+    updateSortIcons();
     initTooltips();
     searchInputEl.focus();
+}
+
+// Sort products by column
+function sortProducts(column) {
+    // Toggle direction if same column, otherwise set to ascending
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+
+    // Sort the filtered products
+    filteredProducts.sort((a, b) => {
+        let valueA, valueB;
+
+        if (column === 'title') {
+            valueA = (a.title || '').toLowerCase();
+            valueB = (b.title || '').toLowerCase();
+        } else if (column === 'price') {
+            valueA = a.price || 0;
+            valueB = b.price || 0;
+        }
+
+        let comparison = 0;
+        if (valueA > valueB) comparison = 1;
+        else if (valueA < valueB) comparison = -1;
+
+        return sortDirection === 'desc' ? -comparison : comparison;
+    });
+
+    // Reset to first page and update display
+    currentPage = 1;
+    displayProducts();
+    updateSortIcons();
+    initTooltips();
+}
+
+// Update sort icons in table headers
+function updateSortIcons() {
+    const sortableHeaders = document.querySelectorAll('.sortable');
+
+    sortableHeaders.forEach(header => {
+        const icon = header.querySelector('.sort-icon');
+        const column = header.getAttribute('data-sort');
+
+        if (column === sortColumn) {
+            icon.className = sortDirection === 'asc'
+                ? 'bi bi-sort-up sort-icon active'
+                : 'bi bi-sort-down sort-icon active';
+        } else {
+            icon.className = 'bi bi-arrow-down-up sort-icon';
+        }
+    });
 }
 
 // Initialize the dashboard
@@ -410,4 +470,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             initTooltips();
         });
     }
+
+    // Add sort event listeners
+    const sortableHeaders = document.querySelectorAll('.sortable');
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function () {
+            const column = this.getAttribute('data-sort');
+            sortProducts(column);
+        });
+    });
 });

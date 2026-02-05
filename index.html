@@ -81,8 +81,14 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th scope="col" class="text-center" style="width: 80px;">ID</th>
-                                    <th scope="col">Title</th>
-                                    <th scope="col" class="text-end" style="width: 120px;">Price</th>
+                                    <th scope="col" class="sortable" data-sort="title">
+                                        Title
+                                        <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </th>
+                                    <th scope="col" class="text-end sortable" data-sort="price" style="width: 120px;">
+                                        Price
+                                        <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    </th>
                                     <th scope="col" style="width: 180px;">Category</th>
                                     <th scope="col" class="text-center" style="width: 150px;">Images</th>
                                 </tr>
