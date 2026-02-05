@@ -141,6 +141,88 @@
         </div>
     </div>
 
+    <!-- Create Product Modal -->
+    <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="createProductModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Tạo sản phẩm mới
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createProductForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="createTitle" class="form-label fw-bold">
+                                    <i class="bi bi-fonts me-1"></i>Tên sản phẩm <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="createTitle" placeholder="Nhập tên sản phẩm"
+                                    required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="createPrice" class="form-label fw-bold">
+                                    <i class="bi bi-currency-dollar me-1"></i>Giá ($) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="createPrice" min="0" step="0.01"
+                                    placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="createDescription" class="form-label fw-bold">
+                                <i class="bi bi-file-text me-1"></i>Mô tả <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="createDescription" rows="3"
+                                placeholder="Nhập mô tả sản phẩm" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="createCategoryId" class="form-label fw-bold">
+                                    <i class="bi bi-tag me-1"></i>Danh mục <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="createCategoryId" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <option value="1">Clothes</option>
+                                    <option value="2">Electronics</option>
+                                    <option value="3">Furniture</option>
+                                    <option value="4">Shoes</option>
+                                    <option value="5">Miscellaneous</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="createImages" class="form-label fw-bold">
+                                    <i class="bi bi-image me-1"></i>URL Hình ảnh <span class="text-danger">*</span>
+                                </label>
+                                <input type="url" class="form-control" id="createImages"
+                                    placeholder="https://example.com/image.jpg" required>
+                                <small class="text-muted">Nhập URL hình ảnh sản phẩm</small>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Loading Spinner for Create -->
+                    <div id="createLoading" class="text-center d-none py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tạo...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Đang tạo sản phẩm mới...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnCreateProduct">
+                        <i class="bi bi-plus-lg me-1"></i>Tạo sản phẩm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Product Detail Modal -->
     <div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel"
         aria-hidden="true">

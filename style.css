@@ -370,6 +370,66 @@ footer {
     transform: translateY(0);
 }
 
+/* Create New Button */
+#btnOpenCreateModal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+#btnOpenCreateModal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+#btnOpenCreateModal:active {
+    transform: translateY(0);
+}
+
+/* Create Product Modal */
+#createProductModal .modal-content {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#createProductModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-bottom: none;
+}
+
+#createProductModal .form-label {
+    color: #495057;
+}
+
+#createProductModal .form-control,
+#createProductModal .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+}
+
+#createProductModal .form-control:focus,
+#createProductModal .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+#createProductModal .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+}
+
+#createProductModal .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
 /* Product Detail Modal */
 #productDetailModal .modal-content {
     border: none;

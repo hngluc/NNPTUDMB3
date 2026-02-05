@@ -59,6 +59,18 @@ const editDescriptionEl = document.getElementById('editDescription');
 // Current selected product
 let currentProduct = null;
 
+// Create Product Modal DOM Elements
+const createProductModal = document.getElementById('createProductModal');
+const createProductFormEl = document.getElementById('createProductForm');
+const createLoadingEl = document.getElementById('createLoading');
+const btnOpenCreateModalEl = document.getElementById('btnOpenCreateModal');
+const btnCreateProductEl = document.getElementById('btnCreateProduct');
+const createTitleEl = document.getElementById('createTitle');
+const createPriceEl = document.getElementById('createPrice');
+const createDescriptionEl = document.getElementById('createDescription');
+const createCategoryIdEl = document.getElementById('createCategoryId');
+const createImagesEl = document.getElementById('createImages');
+
 // Fetch products from API
 async function fetchProducts() {
     try {
@@ -733,6 +745,113 @@ function showToast(message, type = 'success') {
     });
 }
 
+// Open Create Product Modal
+function openCreateModal() {
+    // Reset form
+    createProductFormEl.reset();
+    createProductFormEl.classList.remove('d-none');
+    createLoadingEl.classList.add('d-none');
+
+    // Show the modal
+    const modal = new bootstrap.Modal(createProductModal);
+    modal.show();
+}
+
+// Create new product via API
+async function createProduct() {
+    // Get form values
+    const title = createTitleEl.value.trim();
+    const price = parseFloat(createPriceEl.value);
+    const description = createDescriptionEl.value.trim();
+    const categoryId = parseInt(createCategoryIdEl.value);
+    const imageUrl = createImagesEl.value.trim();
+
+    // Validate
+    if (!title) {
+        showToast('Vui lòng nhập tên sản phẩm!', 'danger');
+        return;
+    }
+
+    if (isNaN(price) || price < 0) {
+        showToast('Giá sản phẩm không hợp lệ!', 'danger');
+        return;
+    }
+
+    if (!description) {
+        showToast('Vui lòng nhập mô tả sản phẩm!', 'danger');
+        return;
+    }
+
+    if (!categoryId) {
+        showToast('Vui lòng chọn danh mục!', 'danger');
+        return;
+    }
+
+    if (!imageUrl) {
+        showToast('Vui lòng nhập URL hình ảnh!', 'danger');
+        return;
+    }
+
+    // Prepare data for API
+    const newProduct = {
+        title: title,
+        price: price,
+        description: description,
+        categoryId: categoryId,
+        images: [imageUrl]
+    };
+
+    // Show loading
+    createProductFormEl.classList.add('d-none');
+    createLoadingEl.classList.remove('d-none');
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newProduct)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Lỗi HTTP: ${response.status}`);
+        }
+
+        const createdProduct = await response.json();
+
+        // Add the new product to the beginning of the arrays
+        allProducts.unshift(createdProduct);
+        filteredProducts.unshift(createdProduct);
+
+        // Refresh the display
+        currentPage = 1;
+        displayProducts();
+        initTooltips();
+
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(createProductModal);
+        modal.hide();
+
+        // Reset form
+        createProductFormEl.reset();
+        createProductFormEl.classList.remove('d-none');
+        createLoadingEl.classList.add('d-none');
+
+        // Show success message
+        showToast(`Tạo sản phẩm thành công! (ID: ${createdProduct.id})`, 'success');
+
+    } catch (error) {
+        console.error('Error creating product:', error);
+        showToast(error.message || 'Lỗi khi tạo sản phẩm', 'danger');
+
+        // Show form again
+        createProductFormEl.classList.remove('d-none');
+        createLoadingEl.classList.add('d-none');
+    }
+}
+
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', async function () {
     await fetchProducts();
@@ -802,6 +921,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (productDetailModal) {
         productDetailModal.addEventListener('hidden.bs.modal', function () {
             switchToViewMode();
+        });
+    }
+
+    // Add Create Product Modal event listeners
+    if (btnOpenCreateModalEl) {
+        btnOpenCreateModalEl.addEventListener('click', openCreateModal);
+    }
+
+    if (btnCreateProductEl) {
+        btnCreateProductEl.addEventListener('click', createProduct);
+    }
+
+    // Reset create form when modal is closed
+    if (createProductModal) {
+        createProductModal.addEventListener('hidden.bs.modal', function () {
+            createProductFormEl.reset();
+            createProductFormEl.classList.remove('d-none');
+            createLoadingEl.classList.add('d-none');
         });
     }
 });
